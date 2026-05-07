@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Warehouse Layout Creator</title>
+  <title>GOA Warehouse Layout Creator</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -21,40 +21,51 @@
     header {
       background: #23272f;
       border-bottom: 1px solid #333;
-      padding: 10px 20px;
+      padding: 8px 16px;
       display: flex;
       align-items: center;
-      gap: 16px;
+      gap: 10px;
       flex-shrink: 0;
+      flex-wrap: wrap;
     }
-    header h1 { font-size: 18px; font-weight: 600; letter-spacing: 0.5px; }
+    header h1 { font-size: 16px; font-weight: 600; white-space: nowrap; }
     header h1 span { color: #5b9cf6; }
-
-    .header-actions { margin-left: auto; display: flex; gap: 8px; }
+    .badge {
+      background: #2d3748;
+      color: #90cdf4;
+      font-size: 10px;
+      padding: 2px 7px;
+      border-radius: 10px;
+      border: 1px solid #4a5568;
+      white-space: nowrap;
+    }
+    .header-actions { margin-left: auto; display: flex; gap: 6px; flex-wrap: wrap; }
     .btn {
-      padding: 6px 14px;
+      padding: 5px 12px;
       border: none;
       border-radius: 6px;
-      font-size: 13px;
+      font-size: 12px;
       cursor: pointer;
       font-weight: 500;
       transition: background 0.15s;
+      white-space: nowrap;
     }
     .btn-ghost { background: transparent; color: #aaa; border: 1px solid #444; }
     .btn-ghost:hover { background: #333; color: #fff; }
-    .btn-danger { background: #c0392b; color: #fff; }
+    .btn-primary { background: #5b9cf6; color: #fff; border: 1px solid #5b9cf6; }
+    .btn-primary:hover { background: #4a8de0; }
+    .btn-danger { background: #c0392b; color: #fff; border: 1px solid #c0392b; }
     .btn-danger:hover { background: #e74c3c; }
+    .zoom-group { display: flex; gap: 2px; align-items: center; }
+    .zoom-group span { font-size: 11px; color: #888; min-width: 36px; text-align: center; }
+    .btn-zoom { padding: 4px 8px; font-size: 14px; font-weight: 700; }
 
     /* ── Layout ── */
-    .workspace {
-      display: flex;
-      flex: 1;
-      overflow: hidden;
-    }
+    .workspace { display: flex; flex: 1; overflow: hidden; }
 
     /* ── Sidebar ── */
     aside {
-      width: 220px;
+      width: 200px;
       background: #23272f;
       border-right: 1px solid #333;
       display: flex;
@@ -62,163 +73,140 @@
       flex-shrink: 0;
       overflow-y: auto;
     }
-    .sidebar-section { padding: 14px; border-bottom: 1px solid #2e3340; }
-    .sidebar-section h2 { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #777; margin-bottom: 10px; }
+    .sidebar-section { padding: 12px; border-bottom: 1px solid #2e3340; }
+    .sidebar-section h2 { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #777; margin-bottom: 8px; }
 
     .tool-btn {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      width: 100%;
-      padding: 9px 10px;
-      border-radius: 7px;
-      border: 2px solid transparent;
-      background: transparent;
-      color: #ccc;
-      cursor: pointer;
-      font-size: 13px;
-      margin-bottom: 4px;
-      transition: background 0.15s, border-color 0.15s;
-      text-align: left;
+      display: flex; align-items: center; gap: 8px;
+      width: 100%; padding: 7px 8px;
+      border-radius: 6px; border: 2px solid transparent;
+      background: transparent; color: #ccc;
+      cursor: pointer; font-size: 12px; margin-bottom: 3px;
+      transition: background 0.15s, border-color 0.15s; text-align: left;
     }
     .tool-btn:hover { background: #2e3340; }
     .tool-btn.active { background: #2e3340; border-color: var(--tool-color); color: #fff; }
-
     .tool-swatch {
-      width: 20px;
-      height: 20px;
-      border-radius: 4px;
-      flex-shrink: 0;
+      width: 16px; height: 16px; border-radius: 3px; flex-shrink: 0;
       border: 1px solid rgba(255,255,255,0.1);
     }
+    .shortcut { margin-left: auto; font-size: 10px; color: #555; background: #1a1d23; padding: 1px 4px; border-radius: 3px; }
 
-    /* ── Zone name input ── */
-    .zone-name-wrap { padding: 14px; border-bottom: 1px solid #2e3340; }
-    .zone-name-wrap h2 { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #777; margin-bottom: 8px; }
+    .zone-name-wrap { padding: 12px; border-bottom: 1px solid #2e3340; }
+    .zone-name-wrap h2 { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #777; margin-bottom: 6px; }
     .zone-name-wrap input {
-      width: 100%;
-      padding: 7px 10px;
-      background: #1a1d23;
-      border: 1px solid #444;
-      border-radius: 6px;
-      color: #e0e0e0;
-      font-size: 13px;
+      width: 100%; padding: 6px 8px;
+      background: #1a1d23; border: 1px solid #444; border-radius: 5px;
+      color: #e0e0e0; font-size: 12px;
     }
     .zone-name-wrap input:focus { outline: none; border-color: #5b9cf6; }
 
-    /* ── Grid size ── */
-    .grid-size-wrap { padding: 14px; }
-    .grid-size-wrap h2 { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #777; margin-bottom: 8px; }
-    .size-row { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; }
-    .size-row label { font-size: 12px; color: #888; width: 48px; }
+    .grid-size-wrap { padding: 12px; border-bottom: 1px solid #2e3340; }
+    .grid-size-wrap h2 { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #777; margin-bottom: 8px; }
+    .size-row { display: flex; align-items: center; gap: 6px; margin-bottom: 5px; }
+    .size-row label { font-size: 11px; color: #888; width: 40px; }
     .size-row input[type=range] { flex: 1; accent-color: #5b9cf6; }
-    .size-row span { font-size: 12px; width: 28px; text-align: right; }
-    .btn-apply { width: 100%; margin-top: 6px; background: #5b9cf6; color: #fff; border: none; border-radius: 6px; padding: 7px; cursor: pointer; font-size: 13px; font-weight: 500; }
-    .btn-apply:hover { background: #4a8de0; }
+    .size-row span { font-size: 11px; width: 26px; text-align: right; }
+    .btn-apply { width: 100%; margin-top: 5px; background: #444; color: #ccc; border: none; border-radius: 5px; padding: 6px; cursor: pointer; font-size: 12px; }
+    .btn-apply:hover { background: #555; }
 
     /* ── Legend ── */
-    .legend { padding: 14px; border-top: 1px solid #2e3340; margin-top: auto; }
-    .legend h2 { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #777; margin-bottom: 8px; }
-    .legend-item { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #aaa; margin-bottom: 5px; }
-    .legend-dot { width: 12px; height: 12px; border-radius: 2px; flex-shrink: 0; }
+    .legend { padding: 12px; margin-top: auto; border-top: 1px solid #2e3340; }
+    .legend h2 { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #777; margin-bottom: 7px; }
+    .legend-item { display: flex; align-items: center; gap: 7px; font-size: 11px; color: #aaa; margin-bottom: 4px; }
+    .legend-dot { width: 11px; height: 11px; border-radius: 2px; flex-shrink: 0; }
 
     /* ── Canvas area ── */
     main {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: auto;
-      padding: 20px;
-      background: #13151a;
+      flex: 1; display: flex; align-items: flex-start; justify-content: flex-start;
+      overflow: auto; padding: 16px; background: #13151a;
     }
+    #grid-wrapper { position: relative; cursor: crosshair; user-select: none; }
+    #warehouse-canvas { display: block; border: 2px solid #3a3f4b; border-radius: 3px; }
 
-    #grid-wrapper {
-      position: relative;
-      cursor: crosshair;
-      user-select: none;
-    }
-
-    #warehouse-canvas {
-      display: block;
-      border: 2px solid #3a3f4b;
-      border-radius: 4px;
-      image-rendering: pixelated;
-    }
-
-    /* Tooltip */
+    /* ── Tooltip ── */
     #tooltip {
-      position: fixed;
-      background: #23272f;
-      border: 1px solid #444;
-      border-radius: 5px;
-      padding: 4px 8px;
-      font-size: 11px;
-      color: #aaa;
-      pointer-events: none;
-      display: none;
-      z-index: 100;
+      position: fixed; background: #23272f; border: 1px solid #444;
+      border-radius: 5px; padding: 3px 7px; font-size: 11px; color: #aaa;
+      pointer-events: none; display: none; z-index: 100;
     }
+
+    /* ── Info bar ── */
+    #infobar {
+      background: #1e2128; border-top: 1px solid #2e3340;
+      padding: 4px 16px; font-size: 11px; color: #666;
+      display: flex; gap: 20px; flex-shrink: 0;
+    }
+    #infobar span { color: #888; }
+    #infobar b { color: #ccc; }
   </style>
 </head>
 <body>
 
 <header>
-  <h1>Warehouse <span>Layout Creator</span></h1>
+  <h1>GOA <span>Warehouse Layout</span></h1>
+  <span class="badge">65 × 33 grid · 1 cell ≈ 1m</span>
+
   <div class="header-actions">
     <button class="btn btn-ghost" id="btn-undo">↩ Undo</button>
     <button class="btn btn-ghost" id="btn-redo">↪ Redo</button>
-    <button class="btn btn-danger" id="btn-clear">Clear All</button>
+    <div class="zoom-group">
+      <button class="btn btn-ghost btn-zoom" id="btn-zoom-out">−</button>
+      <span id="zoom-label">20px</span>
+      <button class="btn btn-ghost btn-zoom" id="btn-zoom-in">+</button>
+    </div>
+    <button class="btn btn-primary" id="btn-reset-goa">⟳ GOA Preset</button>
+    <button class="btn btn-danger" id="btn-clear">✕ Clear All</button>
   </div>
 </header>
 
 <div class="workspace">
   <aside>
     <div class="sidebar-section">
-      <h2>Tools</h2>
+      <h2>Draw Tools</h2>
       <button class="tool-btn active" data-tool="wall" style="--tool-color:#7f8c8d">
-        <span class="tool-swatch" style="background:#7f8c8d"></span> Wall
+        <span class="tool-swatch" style="background:#7f8c8d"></span> Wall <span class="shortcut">1</span>
       </button>
       <button class="tool-btn" data-tool="aisle" style="--tool-color:#5dade2">
-        <span class="tool-swatch" style="background:#5dade2"></span> Aisle / Walkway
+        <span class="tool-swatch" style="background:#5dade2"></span> Aisle <span class="shortcut">2</span>
       </button>
       <button class="tool-btn" data-tool="dock" style="--tool-color:#e67e22">
-        <span class="tool-swatch" style="background:#e67e22"></span> Loading Dock
+        <span class="tool-swatch" style="background:#e67e22"></span> Dock / IBD <span class="shortcut">3</span>
       </button>
       <button class="tool-btn" data-tool="zone" style="--tool-color:#2ecc71">
-        <span class="tool-swatch" style="background:#2ecc71"></span> Zone
+        <span class="tool-swatch" style="background:#2ecc71"></span> Zone <span class="shortcut">4</span>
       </button>
       <button class="tool-btn" data-tool="eraser" style="--tool-color:#e74c3c">
-        <span class="tool-swatch" style="background:#e74c3c; border-style:dashed"></span> Eraser
+        <span class="tool-swatch" style="background:#e74c3c; border-style:dashed"></span> Eraser <span class="shortcut">E</span>
       </button>
     </div>
 
     <div class="zone-name-wrap">
-      <h2>Zone Label</h2>
-      <input type="text" id="zone-label" placeholder="e.g. Receiving, Cold Storage" maxlength="20" />
+      <h2>Zone / Dock Label</h2>
+      <input type="text" id="zone-label" placeholder="e.g. Receiving Area" maxlength="20" />
     </div>
 
     <div class="grid-size-wrap">
       <h2>Grid Size</h2>
       <div class="size-row">
         <label>Cols</label>
-        <input type="range" id="cols-range" min="10" max="60" value="30" />
-        <span id="cols-val">30</span>
+        <input type="range" id="cols-range" min="10" max="80" value="65" />
+        <span id="cols-val">65</span>
       </div>
       <div class="size-row">
         <label>Rows</label>
-        <input type="range" id="rows-range" min="6" max="40" value="20" />
-        <span id="rows-val">20</span>
+        <input type="range" id="rows-range" min="6" max="50" value="33" />
+        <span id="rows-val">33</span>
       </div>
-      <button class="btn-apply" id="btn-apply">Apply Grid Size</button>
+      <button class="btn-apply" id="btn-apply">Apply (clears layout)</button>
     </div>
 
     <div class="legend">
       <h2>Legend</h2>
-      <div class="legend-item"><span class="legend-dot" style="background:#7f8c8d"></span> Wall</div>
-      <div class="legend-item"><span class="legend-dot" style="background:#5dade2"></span> Aisle / Walkway</div>
-      <div class="legend-item"><span class="legend-dot" style="background:#e67e22"></span> Loading Dock</div>
-      <div class="legend-item"><span class="legend-dot" style="background:#2ecc71"></span> Zone</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#7f8c8d"></span> Wall / Partition</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#5dade2"></span> Aisle / Forklift Way</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#e67e22"></span> Loading Dock (IBD/OBD)</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#2ecc71"></span> Storage / Office Zone</div>
     </div>
   </aside>
 
@@ -229,46 +217,209 @@
   </main>
 </div>
 
+<div id="infobar">
+  <span>Tool: <b id="info-tool">wall</b></span>
+  <span>Cursor: <b id="info-pos">—</b></span>
+  <span>Cell: <b id="info-cell">—</b></span>
+  <span>Grid: <b id="info-grid">65 × 33</b></span>
+</div>
+
 <div id="tooltip"></div>
 
 <script>
 (() => {
-  // ── Config ──────────────────────────────────────────────────────────────
-  const CELL = 28;          // px per grid cell
-  const GRID_LINE = '#1e2128';
-  const BG = '#23272f';
-  const EMPTY = '';
+  // ── Constants ──────────────────────────────────────────────────────────
+  let CELL = 20;
+  const GRID_LINE  = '#1a1d22';
+  const BG_COLOR   = '#20242d';
+  const EMPTY      = '';
 
-  const COLORS = {
-    wall:   '#7f8c8d',
-    aisle:  '#5dade2',
-    dock:   '#e67e22',
-    zone:   '#2ecc71',
-  };
-  const ALPHA = {
-    wall: 0.9, aisle: 0.75, dock: 0.9, zone: 0.45,
-  };
+  const COLORS = { wall: '#7f8c8d', aisle: '#5dade2', dock: '#e67e22', zone: '#2ecc71' };
+  const ALPHA  = { wall: 1.0, aisle: 0.65, dock: 0.85, zone: 0.40 };
 
-  // ── State ────────────────────────────────────────────────────────────────
-  let cols = 30, rows = 20;
-  let grid = [];          // grid[r][c] = { type, label }
+  // ── State ─────────────────────────────────────────────────────────────
+  let cols = 65, rows = 33;
+  let grid   = [];
   let currentTool = 'wall';
-  let painting = false;
-  let history = [];       // undo stack (snapshots)
+  let painting    = false;
+  let history  = [];
   let redoStack = [];
 
   const canvas = document.getElementById('warehouse-canvas');
-  const ctx = canvas.getContext('2d');
+  const ctx    = canvas.getContext('2d');
 
-  // ── Init ─────────────────────────────────────────────────────────────────
-  function initGrid(c, r) {
+  // ── GOA Preset Builder ───────────────────────────────────────────────
+  function buildGOALayout() {
+    const C = 65, R = 33;
+    const g = Array.from({ length: R }, () =>
+      Array.from({ length: C }, () => ({ type: EMPTY, label: '' }))
+    );
+
+    function fill(type, r1, c1, r2, c2, label = '') {
+      const rMin = Math.min(r1, r2), rMax = Math.max(r1, r2);
+      const cMin = Math.min(c1, c2), cMax = Math.max(c1, c2);
+      for (let r = rMin; r <= rMax; r++)
+        for (let c = cMin; c <= cMax; c++)
+          if (r >= 0 && r < R && c >= 0 && c < C)
+            g[r][c] = { type, label };
+    }
+
+    // ═══ OUTER PERIMETER WALLS ═══════════════════════════════════════════
+    fill('wall',  0,  0,  0, 64);   // top wall
+    fill('wall',  0,  0, 32,  0);   // left wall
+    fill('wall',  0, 64, 32, 64);   // right wall
+    fill('wall', 32,  0, 32, 64);   // bottom wall
+
+    // ═══ MAIN STORAGE FLOOR (rows 1 – 22) ════════════════════════════════
+
+    // ── Bag Staging Area (6m wide, full height)
+    fill('zone',  1,  1, 22,  7, 'Bag Staging');
+    fill('wall',  1,  8, 22,  8);                // partition
+
+    // ── Bale Storage Area (7m wide, full height)
+    fill('zone',  1,  9, 22, 15, 'Bale Storage');
+    fill('wall',  1, 16, 22, 17);                // 2m aisle/gap between left block & center
+
+    // ── Sorted Plastic Storage Area-2 (upper 11 rows) + Baling Area (lower)
+    fill('zone',  1, 18, 11, 24, 'Sorted Plastic 2');
+    fill('wall', 12, 18, 12, 24);                // horizontal divider
+    fill('zone', 13, 18, 22, 24, 'Baling Area');
+    fill('wall',  1, 25, 22, 25);                // right wall of this block
+
+    // ── Manual Sorting Area (12m wide, full height, 3 conveyor lanes)
+    fill('zone',  1, 26, 22, 37, 'Manual Sorting');
+    // Conveyor lanes shown as aisle stripes
+    fill('aisle',  5, 26,  5, 37);
+    fill('aisle', 12, 26, 12, 37);
+    fill('aisle', 19, 26, 19, 37);
+    fill('wall',   1, 38, 22, 38);
+
+    // ── Glass Staging Area (upper) + Glass Packing Area (lower)
+    fill('zone',  1, 39, 11, 44, 'Glass Staging');
+    fill('wall', 12, 39, 12, 44);
+    fill('zone', 13, 39, 22, 44, 'Glass Packing');
+    fill('wall',  1, 45, 22, 45);
+
+    // ── Sorted Plastic Storage Area-1 (6m, 5 compartments)
+    fill('zone',  1, 46, 22, 51, 'Sorted Plastic 1');
+    // Compartment dividers (5 compartments: horizontal splits every ~4 rows)
+    fill('wall',  5, 46,  5, 51);
+    fill('wall', 10, 46, 10, 51);
+    fill('wall', 15, 46, 15, 51);
+    fill('wall', 20, 46, 20, 51);
+    fill('wall',  1, 52, 22, 52);
+
+    // ── Cullet Storage Area-1 (6m, 4 compartments in 2×2)
+    fill('zone',  1, 53, 22, 58, 'Cullet Storage 1');
+    fill('wall', 12, 53, 12, 58);                // horizontal mid-divider (2 rows)
+    fill('wall',  1, 55, 22, 55);                // vertical mid-divider (2 cols)
+    fill('wall',  1, 59, 22, 59);
+
+    // ── Cullet Storage Area-2 (right strip, 2 compartments stacked)
+    fill('zone',  1, 60, 11, 63, 'Cullet 2 (Upper)');
+    fill('wall', 12, 60, 12, 63);
+    fill('zone', 13, 60, 22, 63, 'Cullet 2 (Lower)');
+
+    // ═══ HORIZONTAL DIVIDER — warehouse floor / lower zone ═══════════════
+    fill('wall', 23,  1, 23, 63);
+
+    // ═══ LOWER ZONE (rows 24 – 26): offices + IBD/OBD staging ════════════
+    fill('zone', 24,  1, 26,  6, 'Break Room');
+    fill('wall', 24,  7, 26,  7);
+    fill('zone', 24,  8, 26, 12, 'Office Area');
+    fill('wall', 24, 13, 26, 13);
+
+    // OBD-1 (outbound dock staging)
+    fill('dock', 24, 14, 26, 16, 'OBD-1');
+    fill('wall', 24, 17, 26, 17);
+
+    // IBD-1 … IBD-5 (inbound staging bays)
+    fill('dock', 24, 18, 26, 22, 'IBD-1');
+    fill('wall', 24, 23, 26, 23);
+    fill('dock', 24, 24, 26, 28, 'IBD-2');
+    fill('wall', 24, 29, 26, 29);
+    fill('dock', 24, 30, 26, 34, 'IBD-3');
+    fill('wall', 24, 35, 26, 35);
+    fill('dock', 24, 36, 26, 40, 'IBD-4');
+    fill('wall', 24, 41, 26, 41);
+    fill('dock', 24, 42, 26, 46, 'IBD-5');
+    fill('wall', 24, 47, 26, 47);
+
+    // OBD-2
+    fill('dock', 24, 48, 26, 52, 'OBD-2');
+    fill('wall', 24, 53, 26, 63);               // right of dock zone (storage cols)
+
+    // Staircase (bottom-left, outside dock row)
+    fill('zone', 24, 53, 26, 58, 'Cullet 1 Lower');
+    fill('zone', 24, 59, 26, 63, 'Cullet 2 Lower');
+
+    // ═══ DOCK THRESHOLD WALL (row 27) ════════════════════════════════════
+    fill('wall', 27,  0, 27, 64);
+    // Openings aligned to IBD bays above
+    fill('aisle', 27, 18, 27, 22);   // IBD-1 truck entry
+    fill('aisle', 27, 24, 27, 28);   // IBD-2
+    fill('aisle', 27, 30, 27, 34);   // IBD-3
+    fill('aisle', 27, 36, 27, 40);   // IBD-4
+    fill('aisle', 27, 42, 27, 46);   // IBD-5
+
+    // ═══ TRUCK DOCK BAYS (rows 28 – 31) ═════════════════════════════════
+    // Outer side walls of dock area
+    fill('wall', 28, 17, 31, 17);
+    fill('wall', 28, 47, 31, 47);
+
+    // Bay separating walls (between each IBD truck lane)
+    fill('wall', 28, 23, 31, 23);
+    fill('wall', 28, 29, 31, 29);
+    fill('wall', 28, 35, 31, 35);
+    fill('wall', 28, 41, 31, 41);
+
+    // Bay interiors (aisle = truck lane)
+    fill('aisle', 28, 18, 31, 22);   // Bay 1 (IBD-1)
+    fill('aisle', 28, 24, 31, 28);   // Bay 2 (IBD-2)
+    fill('aisle', 28, 30, 31, 34);   // Bay 3 (IBD-3)
+    fill('aisle', 28, 36, 31, 40);   // Bay 4 (IBD-4)
+    fill('aisle', 28, 42, 31, 46);   // Bay 5 (IBD-5)
+
+    // OBD bay (bottom right of warehouse)
+    fill('wall', 28,  1, 31,  1);
+    fill('wall', 28, 10, 31, 10);
+    fill('aisle', 28,  2, 31,  9);   // OBD truck lane
+
+    // Forklift aisle running across bottom of dock area
+    fill('aisle', 31,  2, 31, 46);
+
+    // Staircase (left side, between dock and lower zone)
+    fill('zone', 28, 11, 31, 16, 'Staircase');
+
+    return { grid: g, cols: C, rows: R };
+  }
+
+  // ── Init ──────────────────────────────────────────────────────────────
+  function loadPreset() {
+    const { grid: g, cols: c, rows: r } = buildGOALayout();
+    cols = c; rows = r;
+    grid = g;
+    document.getElementById('cols-range').value = cols;
+    document.getElementById('rows-range').value = rows;
+    document.getElementById('cols-val').textContent = cols;
+    document.getElementById('rows-val').textContent = rows;
+    document.getElementById('info-grid').textContent = `${cols} × ${rows}`;
+    resizeCanvas();
+    draw();
+    history = [snapshot()];
+    redoStack = [];
+  }
+
+  function initBlankGrid(c, r) {
     cols = c; rows = r;
     grid = Array.from({ length: rows }, () =>
       Array.from({ length: cols }, () => ({ type: EMPTY, label: '' }))
     );
+    document.getElementById('info-grid').textContent = `${cols} × ${rows}`;
     resizeCanvas();
     draw();
-    saveSnapshot();
+    history = [snapshot()];
+    redoStack = [];
   }
 
   function resizeCanvas() {
@@ -276,52 +427,58 @@
     canvas.height = rows * CELL;
   }
 
-  // ── Draw ─────────────────────────────────────────────────────────────────
+  // ── Draw ─────────────────────────────────────────────────────────────
   function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // background
-    ctx.fillStyle = BG;
+    // Background
+    ctx.fillStyle = BG_COLOR;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // cells
+    // Cells
     for (let r = 0; r < rows; r++) {
       for (let c = 0; c < cols; c++) {
         const cell = grid[r][c];
-        if (cell.type && cell.type !== EMPTY) {
-          const color = COLORS[cell.type];
-          const alpha = ALPHA[cell.type];
-          ctx.globalAlpha = alpha;
-          ctx.fillStyle = color;
+        if (!cell.type) continue;
+
+        const color = COLORS[cell.type];
+        const alpha = ALPHA[cell.type];
+
+        ctx.globalAlpha = alpha;
+        ctx.fillStyle = color;
+        if (cell.type === 'wall') {
+          ctx.fillRect(c * CELL, r * CELL, CELL, CELL);
+        } else {
           ctx.fillRect(c * CELL + 1, r * CELL + 1, CELL - 2, CELL - 2);
-          ctx.globalAlpha = 1;
+        }
+        ctx.globalAlpha = 1;
 
-          // label for zones
-          if (cell.type === 'zone' && cell.label) {
-            ctx.fillStyle = '#fff';
-            ctx.font = `bold ${CELL >= 24 ? 9 : 7}px sans-serif`;
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText(
-              cell.label.substring(0, 6),
-              c * CELL + CELL / 2,
-              r * CELL + CELL / 2
-            );
-          }
+        // Label for zones and docks
+        if (cell.label && CELL >= 14) {
+          const maxChars = CELL >= 20 ? 8 : 4;
+          ctx.fillStyle = cell.type === 'zone' ? 'rgba(255,255,255,0.85)' : '#fff';
+          ctx.font = `bold ${Math.max(6, Math.min(CELL * 0.38, 9))}px sans-serif`;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(
+            cell.label.substring(0, maxChars),
+            c * CELL + CELL / 2,
+            r * CELL + CELL / 2
+          );
+        }
 
-          // dock icon (arrow)
-          if (cell.type === 'dock') {
-            ctx.fillStyle = 'rgba(255,255,255,0.7)';
-            ctx.font = `${CELL >= 24 ? 12 : 9}px sans-serif`;
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText('⬛', c * CELL + CELL / 2, r * CELL + CELL / 2);
-          }
+        // Dock arrow indicator
+        if (cell.type === 'dock' && CELL >= 18 && !cell.label) {
+          ctx.fillStyle = 'rgba(255,255,255,0.5)';
+          ctx.font = `${Math.max(8, CELL * 0.5)}px sans-serif`;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText('▼', c * CELL + CELL / 2, r * CELL + CELL / 2);
         }
       }
     }
 
-    // grid lines
+    // Grid lines
     ctx.strokeStyle = GRID_LINE;
     ctx.lineWidth = 0.5;
     for (let c = 0; c <= cols; c++) {
@@ -336,27 +493,14 @@
       ctx.lineTo(cols * CELL, r * CELL);
       ctx.stroke();
     }
-
-    // outline border for wall cells (thicker border)
-    for (let r = 0; r < rows; r++) {
-      for (let c = 0; c < cols; c++) {
-        if (grid[r][c].type === 'wall') {
-          ctx.strokeStyle = '#5d6d7e';
-          ctx.lineWidth = 1;
-          ctx.strokeRect(c * CELL + 1, r * CELL + 1, CELL - 2, CELL - 2);
-        }
-      }
-    }
   }
 
-  // ── Paint ─────────────────────────────────────────────────────────────────
+  // ── Paint ────────────────────────────────────────────────────────────
   function cellAt(e) {
     const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
     return {
-      c: Math.floor(x / CELL),
-      r: Math.floor(y / CELL),
+      c: Math.floor((e.clientX - rect.left)  / CELL),
+      r: Math.floor((e.clientY - rect.top)   / CELL),
     };
   }
 
@@ -364,68 +508,74 @@
     const { c, r } = cellAt(e);
     if (c < 0 || c >= cols || r < 0 || r >= rows) return;
     const cell = grid[r][c];
-
     if (currentTool === 'eraser') {
-      cell.type  = EMPTY;
-      cell.label = '';
+      cell.type = EMPTY; cell.label = '';
     } else {
       cell.type = currentTool;
-      if (currentTool === 'zone') {
+      if (currentTool === 'zone' || currentTool === 'dock') {
         cell.label = document.getElementById('zone-label').value.trim();
+      } else {
+        cell.label = '';
       }
     }
     draw();
+    updateInfoCell(r, c);
   }
 
-  // ── History ───────────────────────────────────────────────────────────────
+  // ── History ──────────────────────────────────────────────────────────
   function snapshot() {
     return grid.map(row => row.map(c => ({ ...c })));
   }
-
   function saveSnapshot() {
     history.push(snapshot());
     if (history.length > 80) history.shift();
     redoStack = [];
   }
-
   function undo() {
     if (history.length <= 1) return;
     redoStack.push(history.pop());
     grid = history[history.length - 1].map(row => row.map(c => ({ ...c })));
     draw();
   }
-
   function redo() {
     if (!redoStack.length) return;
-    const next = redoStack.pop();
-    history.push(next);
-    grid = next.map(row => row.map(c => ({ ...c })));
+    history.push(redoStack.pop());
+    grid = history[history.length - 1].map(row => row.map(c => ({ ...c })));
     draw();
   }
 
-  // ── Events ────────────────────────────────────────────────────────────────
+  // ── Info bar ─────────────────────────────────────────────────────────
+  function updateInfoCell(r, c) {
+    const cell = (r >= 0 && r < rows && c >= 0 && c < cols) ? grid[r][c] : null;
+    document.getElementById('info-pos').textContent = `Col ${c + 1}, Row ${r + 1}`;
+    document.getElementById('info-cell').textContent = cell && cell.type
+      ? `${cell.type}${cell.label ? ` — "${cell.label}"` : ''}`
+      : 'empty';
+  }
+
+  // ── Events ───────────────────────────────────────────────────────────
   canvas.addEventListener('mousedown', e => {
     painting = true;
     saveSnapshot();
     paintCell(e);
   });
+
   canvas.addEventListener('mousemove', e => {
     if (painting) paintCell(e);
-
-    // tooltip
     const { c, r } = cellAt(e);
-    const tooltip = document.getElementById('tooltip');
     if (c >= 0 && c < cols && r >= 0 && r < rows) {
+      updateInfoCell(r, c);
       const cell = grid[r][c];
-      const label = cell.type
-        ? `${cell.type}${cell.label ? ` — "${cell.label}"` : ''} [col ${c+1}, row ${r+1}]`
-        : `Empty [col ${c+1}, row ${r+1}]`;
-      tooltip.textContent = label;
+      const tooltip = document.getElementById('tooltip');
+      tooltip.textContent = cell.type
+        ? `[${c + 1},${r + 1}] ${cell.type}${cell.label ? ` · ${cell.label}` : ''}`
+        : `[${c + 1},${r + 1}] empty`;
       tooltip.style.display = 'block';
-      tooltip.style.left = (e.clientX + 12) + 'px';
-      tooltip.style.top  = (e.clientY + 12) + 'px';
+      tooltip.style.left = (e.clientX + 14) + 'px';
+      tooltip.style.top  = (e.clientY + 14) + 'px';
     }
   });
+
   window.addEventListener('mouseup', () => { painting = false; });
   canvas.addEventListener('mouseleave', () => {
     document.getElementById('tooltip').style.display = 'none';
@@ -437,6 +587,7 @@
       document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       currentTool = btn.dataset.tool;
+      document.getElementById('info-tool').textContent = currentTool;
     });
   });
 
@@ -446,36 +597,51 @@
 
   // Clear
   document.getElementById('btn-clear').addEventListener('click', () => {
-    if (!confirm('Clear the entire layout?')) return;
+    if (!confirm('Clear entire layout?')) return;
     saveSnapshot();
     grid.forEach(row => row.forEach(c => { c.type = EMPTY; c.label = ''; }));
     draw();
   });
+
+  // GOA Preset
+  document.getElementById('btn-reset-goa').addEventListener('click', () => {
+    if (!confirm('Reset to GOA Main Warehouse layout? Unsaved changes will be lost.')) return;
+    loadPreset();
+  });
+
+  // Zoom
+  function setZoom(z) {
+    CELL = Math.max(10, Math.min(40, z));
+    document.getElementById('zoom-label').textContent = CELL + 'px';
+    resizeCanvas();
+    draw();
+  }
+  document.getElementById('btn-zoom-in').addEventListener('click', () => setZoom(CELL + 2));
+  document.getElementById('btn-zoom-out').addEventListener('click', () => setZoom(CELL - 2));
 
   // Grid size
   const colsRange = document.getElementById('cols-range');
   const rowsRange = document.getElementById('rows-range');
   colsRange.addEventListener('input', () => { document.getElementById('cols-val').textContent = colsRange.value; });
   rowsRange.addEventListener('input', () => { document.getElementById('rows-val').textContent = rowsRange.value; });
-
   document.getElementById('btn-apply').addEventListener('click', () => {
-    if (!confirm('Resizing will clear the current layout. Continue?')) return;
-    history = []; redoStack = [];
-    initGrid(+colsRange.value, +rowsRange.value);
+    if (!confirm('Applying a new grid size will clear the current layout. Continue?')) return;
+    initBlankGrid(+colsRange.value, +rowsRange.value);
   });
 
   // Keyboard shortcuts
   window.addEventListener('keydown', e => {
-    if ((e.ctrlKey || e.metaKey) && e.key === 'z') { e.preventDefault(); undo(); }
-    if ((e.ctrlKey || e.metaKey) && e.key === 'y') { e.preventDefault(); redo(); }
-    const keyMap = { '1': 'wall', '2': 'aisle', '3': 'dock', '4': 'zone', 'e': 'eraser' };
-    if (keyMap[e.key] && !e.ctrlKey && !e.metaKey) {
-      document.querySelector(`[data-tool="${keyMap[e.key]}"]`).click();
-    }
+    if (e.target.tagName === 'INPUT') return;
+    if ((e.ctrlKey || e.metaKey) && e.key === 'z') { e.preventDefault(); undo(); return; }
+    if ((e.ctrlKey || e.metaKey) && e.key === 'y') { e.preventDefault(); redo(); return; }
+    if (e.key === '+' || e.key === '=') { setZoom(CELL + 2); return; }
+    if (e.key === '-')                  { setZoom(CELL - 2); return; }
+    const keyMap = { '1': 'wall', '2': 'aisle', '3': 'dock', '4': 'zone', 'e': 'eraser', 'E': 'eraser' };
+    if (keyMap[e.key]) document.querySelector(`[data-tool="${keyMap[e.key]}"]`).click();
   });
 
-  // ── Start ─────────────────────────────────────────────────────────────────
-  initGrid(cols, rows);
+  // ── Boot ─────────────────────────────────────────────────────────────
+  loadPreset();
 })();
 </script>
 </body>
